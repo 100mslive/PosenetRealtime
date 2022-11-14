@@ -1,4 +1,10 @@
-import React, { useCallback, useEffect, useRef, useState } from "react";
+import React, {
+  Fragment,
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+} from "react";
 import "./App.css";
 import { load } from "@tensorflow-models/posenet";
 import Webcam from "react-webcam";
@@ -23,17 +29,15 @@ function App() {
   const [currentImage, setCurrentImage] = useState(-1);
   const [success, setSuccess] = useState(Array(images.length).fill(null));
   const [isPosenetInit, setPoseNetInitState] = useState(false);
-  const [deviceId, setDeviceId] = React.useState({});
+  const [deviceId, setDeviceId] = React.useState(null);
   const [devices, setDevices] = React.useState([]);
 
-  const handleDevices = React.useCallback(
-    mediaDevices => {
-      const videoDevices = mediaDevices.filter(({ kind }) => kind === "videoinput");
-      setDevices(videoDevices);
-      setDeviceId(videoDevices[0].deviceId);
-    },
-    []
-  );
+  const handleDevices = React.useCallback((mediaDevices) => {
+    const videoDevices = mediaDevices.filter(
+      ({ kind }) => kind === "videoinput"
+    );
+    setDevices(videoDevices);
+  }, []);
 
   /**
    * @param {posenet.PoseNet} net
@@ -96,9 +100,12 @@ function App() {
 
   useEffect(() => {
     if (!posenetRef.current) {
-      navigator.mediaDevices.getUserMedia({ video: true }).then(() => {
-        navigator.mediaDevices.enumerateDevices().then(handleDevices);
-      }).catch(console.error);
+      navigator.mediaDevices
+        .getUserMedia({ video: true })
+        .then(() => {
+          navigator.mediaDevices.enumerateDevices().then(handleDevices);
+        })
+        .catch(console.error);
       runPosenet();
     }
   }, [runPosenet, handleDevices]);
@@ -150,34 +157,45 @@ function App() {
 
   return (
     <div className="container">
-      <select value={deviceId} onChange={(e) => console.log(e.target.value)}>
-        {devices.map(value => {
-          return (<option value={value.deviceId}>{value.label}</option>)
+      <select value={deviceId} onChange={(e) => setDeviceId(e.target.value)} style={{ visibility: deviceId ? 'hidden': 'visible' }}>
+        {devices.map((value) => {
+          return <option key={value.deviceId} value={value.deviceId}>{value.label}</option>;
         })}
       </select>
-      <div className="centered">
-        <Webcam ref={webcamRef} mirrored videoConstraints={{ frameRate: { max: 15 }, deviceId: deviceId || 'default'}}/>
-        <canvas className="canvas" ref={canvasRef} />
-      </div>
-      <button onClick={start} disabled={counter > -1 || !isPosenetInit}>
-        {counter > 0 ? counter : "Start"}
-      </button>
-      <div
-        className="image-score"
-        style={{
-          visibility: counter > -1 ? "visible" : "hidden",
-        }}
-      >
-        <img
-          ref={imgRef}
-          alt="pose"
-          crossOrigin="anonymous"
-          src={images[currentImage]}
-          id="pose-match"
-          style={{ width: "100%" }}
-        />
-        <h1>{maxDistance.toFixed(2)}</h1>
-      </div>
+      {deviceId && (
+        <Fragment>
+          <div className="centered">
+            <Webcam
+              ref={webcamRef}
+              mirrored
+              videoConstraints={{
+                frameRate: { max: 15 },
+                deviceId: deviceId || "default",
+              }}
+            />
+            <canvas className="canvas" ref={canvasRef} />
+          </div>
+          <button onClick={start} disabled={counter > -1 || !isPosenetInit}>
+            {counter > 0 ? counter : "Start"}
+          </button>
+          <div
+            className="image-score"
+            style={{
+              visibility: counter > -1 ? "visible" : "hidden",
+            }}
+          >
+            <img
+              ref={imgRef}
+              alt="pose"
+              crossOrigin="anonymous"
+              src={images[currentImage]}
+              id="pose-match"
+              style={{ width: "100%" }}
+            />
+            <h1>{maxDistance.toFixed(2)}</h1>
+          </div>
+        </Fragment>
+      )}
     </div>
   );
 }
