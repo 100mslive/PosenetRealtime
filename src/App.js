@@ -23,6 +23,17 @@ function App() {
   const [currentImage, setCurrentImage] = useState(-1);
   const [success, setSuccess] = useState(Array(images.length).fill(null));
   const [isPosenetInit, setPoseNetInitState] = useState(false);
+  const [deviceId, setDeviceId] = React.useState({});
+  const [devices, setDevices] = React.useState([]);
+
+  const handleDevices = React.useCallback(
+    mediaDevices => {
+      const videoDevices = mediaDevices.filter(({ kind }) => kind === "videoinput");
+      setDevices(videoDevices);
+      setDeviceId(videoDevices[0].deviceId);
+    },
+    []
+  );
 
   /**
    * @param {posenet.PoseNet} net
@@ -85,9 +96,12 @@ function App() {
 
   useEffect(() => {
     if (!posenetRef.current) {
+      navigator.mediaDevices.getUserMedia({ video: true }).then(() => {
+        navigator.mediaDevices.enumerateDevices().then(handleDevices);
+      }).catch(console.error);
       runPosenet();
     }
-  }, [runPosenet]);
+  }, [runPosenet, handleDevices]);
 
   useEffect(() => {
     if (currentImage !== -1 && imgRef.current.src === images[currentImage]) {
@@ -136,8 +150,13 @@ function App() {
 
   return (
     <div className="container">
+      <select value={deviceId} onChange={(e) => console.log(e.target.value)}>
+        {devices.map(value => {
+          return (<option value={value.deviceId}>{value.label}</option>)
+        })}
+      </select>
       <div className="centered">
-        <Webcam ref={webcamRef} mirrored videoConstraints={{ frameRate: { max: 15 }}}/>
+        <Webcam ref={webcamRef} mirrored videoConstraints={{ frameRate: { max: 15 }, deviceId: deviceId || 'default'}}/>
         <canvas className="canvas" ref={canvasRef} />
       </div>
       <button onClick={start} disabled={counter > -1 || !isPosenetInit}>
