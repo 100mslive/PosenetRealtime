@@ -157,9 +157,18 @@ function App() {
 
   return (
     <div className="container">
-      <select value={deviceId} onChange={(e) => setDeviceId(e.target.value)} style={{ visibility: deviceId ? 'hidden': 'visible' }}>
+      <select
+        value={deviceId}
+        onChange={(e) => setDeviceId(e.target.value)}
+        style={{ visibility: deviceId ? "hidden" : "visible" }}
+      >
+        <option value="">Select Camera</option>
         {devices.map((value) => {
-          return <option key={value.deviceId} value={value.deviceId}>{value.label}</option>;
+          return (
+            <option key={value.deviceId} value={value.deviceId}>
+              {value.label}
+            </option>
+          );
         })}
       </select>
       {deviceId && (
