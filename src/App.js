@@ -29,7 +29,7 @@ function App() {
   const [currentImage, setCurrentImage] = useState(-1);
   const [success, setSuccess] = useState(Array(images.length).fill(null));
   const [isPosenetInit, setPoseNetInitState] = useState(false);
-  const [deviceId, setDeviceId] = React.useState(null);
+  const [deviceId, setDeviceId] = React.useState("");
   const [devices, setDevices] = React.useState([]);
 
   const handleDevices = React.useCallback((mediaDevices) => {
@@ -85,6 +85,7 @@ function App() {
   const start = useCallback(async () => {
     if (currentImage === images.length - 1) {
       setCurrentImage(0);
+      setSuccess(Array(images.length).fill(null));
     } else {
       setCurrentImage(currentImage + 1);
     }
@@ -155,6 +156,51 @@ function App() {
     }
   }, [success]);
 
+  const renderStatus = () => {
+    if (currentImage === -1 || success[currentImage] === null) {
+      return null;
+    }
+    return success[currentImage] ? (
+      <div className="status-container">
+        <div className="status success">
+          <svg
+            width="24"
+            height="24"
+            viewBox="0 0 24 24"
+            fill="none"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path
+              d="M8.84367 19.434C9.30782 19.4734 9.68323 19.3112 9.96914 18.9561L20.6004 6.94447C20.8088 6.67107 20.9085 6.43254 20.9285 6.19609C20.9813 5.5743 20.5798 5.10803 19.9492 5.05455C19.5201 5.01815 19.244 5.1535 18.9464 5.54282L9.0205 16.8293L4.66648 11.4234C4.43272 11.0595 4.17312 10.8964 3.78779 10.8637C3.15724 10.8102 2.66396 11.2182 2.61196 11.8313C2.58893 12.1028 2.66298 12.3737 2.86765 12.6645L7.80527 18.7814C8.0791 19.1927 8.38827 19.3954 8.84367 19.434Z"
+              fill="white"
+            />
+          </svg>
+        </div>
+        Success!!
+      </div>
+    ) : (
+      <div className="status-container">
+        <div className="status error">
+          <svg
+            width="24"
+            height="24"
+            viewBox="0 0 24 24"
+            fill="none"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path
+              fillRule="evenodd"
+              clipRule="evenodd"
+              d="M18.7071 6.70711C19.0976 6.31658 19.0976 5.68342 18.7071 5.29289C18.3166 4.90237 17.6834 4.90237 17.2929 5.29289L12 10.5858L6.70711 5.29289C6.31658 4.90237 5.68342 4.90237 5.29289 5.29289C4.90237 5.68342 4.90237 6.31658 5.29289 6.70711L10.5858 12L5.29289 17.2929C4.90237 17.6834 4.90237 18.3166 5.29289 18.7071C5.68342 19.0976 6.31658 19.0976 6.70711 18.7071L12 13.4142L17.2929 18.7071C17.6834 19.0976 18.3166 19.0976 18.7071 18.7071C19.0976 18.3166 19.0976 17.6834 18.7071 17.2929L13.4142 12L18.7071 6.70711Z"
+              fill="white"
+            />
+          </svg>
+        </div>
+        Failed
+      </div>
+    );
+  };
+
   return (
     <div className="container">
       <select
@@ -190,7 +236,7 @@ function App() {
           <div
             className="image-score"
             style={{
-              visibility: counter > -1 ? "visible" : "hidden",
+              visibility: currentImage !== -1 ? "visible" : "hidden",
             }}
           >
             <img
@@ -199,9 +245,10 @@ function App() {
               crossOrigin="anonymous"
               src={images[currentImage]}
               id="pose-match"
-              style={{ width: "100%" }}
+              style={{ width: "100%", marginBottom: 8 }}
             />
             <h1>{maxDistance.toFixed(2)}</h1>
+            {renderStatus()}
           </div>
         </Fragment>
       )}

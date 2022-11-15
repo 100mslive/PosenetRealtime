@@ -63,3 +63,26 @@ button:disabled {
   background: rgba(36, 113, 237, 0.5);
   cursor: not-allowed;
 }
+
+.status-container {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.status {
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+}
+
+.status.success {
+  background: #36B37E;
+}
+
+.status.error {
+  background: #CC525F;
+}
